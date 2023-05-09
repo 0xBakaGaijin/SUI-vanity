@@ -37,8 +37,8 @@ fn main() {
                 .default_value("10")
         })
         .arg(
-            Arg::new("num")
-                .help("Num of zero prefix")
+            Arg::new("prefix")
+                .help("The hex prefix need to match")
                 .index(1)
                 .required(true),
         )
@@ -57,13 +57,16 @@ fn main() {
             .parse::<u64>()
             .unwrap(),
     );
-    let num = matches
-        .get_one::<String>("num")
-        .unwrap()
-        .parse::<usize>()
-        .unwrap();
-    let word = format!("{}{}", "0x", "0".repeat(num));
-    println!("searching prefix: {:?}", word);
+    let prefix = matches.get_one::<String>("prefix").unwrap();
+
+    for c in prefix.chars() {
+        if !c.is_ascii_hexdigit() {
+            panic!("Prefix are not in hex format!");
+        }
+    }
+
+    let prefix = format!("{}{}", "0x", prefix);
+    println!("searching prefix: {:?}", prefix);
 
     let exit_flag = Arc::new(AtomicBool::new(false));
 
@@ -72,14 +75,14 @@ fn main() {
 
     let mut threads = (0..threads)
         .map(|_| {
-            let word = word.clone();
+            let prefix = prefix.clone();
             let exit_flag = Arc::clone(&exit_flag);
             let perf_count = Arc::clone(&perf_count);
             spawn(move || {
                 while !exit_flag.load(Ordering::Relaxed) {
                     let chunk = 10;
                     for _ in 0..chunk {
-                        if generate(&word) && exit {
+                        if generate(&prefix) && exit {
                             exit_flag.store(true, Ordering::Relaxed);
                         }
                     }
@@ -113,13 +116,13 @@ fn main() {
     }
 }
 
-fn generate(word: &str) -> bool {
+fn generate(prefix: &str) -> bool {
     let kp = generate_new_key(SignatureScheme::ED25519, None, None).unwrap();
 
-    if kp.0.to_string().starts_with(word) {
+    if kp.0.to_string().starts_with(prefix) {
         println!("{:#?}", kp);
-        return true;
+        true
     } else {
-        return false;
+        false
     }
 }
