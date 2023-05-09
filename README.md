@@ -1,16 +1,16 @@
 # SUI vanity address generator
 
-**Currently, only the ED25519 signature scheme and zeros prefix are supported, using the official sui-sdk which is slow but safe.**
+**Currently, only the ED25519 signature scheme are supported, using the official sui-sdk which is slow but safe.**
 
 PS. Yes, I know about GPU generators.
 
 ```bash
 ./target/release/sui-vanity-address --help
 
-$ Usage: sui-vanity-address [OPTIONS] <num>
+$ Usage: sui-vanity-address [OPTIONS] <prefix>
 $
 $ Arguments:
-$   <num>  Num of zero prefix
+$   <prefix>  The hex prefix need to match
 $
 $ Options:
 $  -t, --threads <threads>  Number of threads for lookup [default: all cpus]
